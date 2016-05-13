@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>tesh.html</title>
+    <title>test.html</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -16,6 +16,7 @@
             <div class="posts-table"></div>
         </main>
     </div>
+
     <footer class="footer">
         <div class="layout">
             42
@@ -25,10 +26,15 @@
     <script type="text/x-handlebars-template" id="posts-json-template">
         {{json posts}}
     </script>
+    <script type="text/x-handlebars-template" id="posts-table-template">
+        {{#table posts}}
+            {{description}}
+        {{/table}}
+    </script>
 
     <script src="/libs/jquery/dist/jquery.js"></script>
     <script src="/libs/handlebars/handlebars.js"></script>
     <script src="/data.js"></script>
-    <script src="/test.js"></script>
+    <script src="/posts.js"></script>
 </body>
 </html>
