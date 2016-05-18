@@ -1,0 +1,8 @@
+**/node_modules/
+**/client_src/css/less/README.md
+**/client_src/libs/
+**/client_src/post-test.html
+**/client_src/posts-test.js
+**/client_src/test-tmp.html
+**/client_src/test-tmp.js
+**csscomb.json
