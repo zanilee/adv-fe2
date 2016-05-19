@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>test.html</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <header class="header">
+            <div class="layout">
+                <img src="img/logo.png" height="50" width="90" alt="the Logo">
+            </div>
+        </header>
+        <main class="layout">
+            <div class="posts-json"></div>
+            <div class="posts-table"></div>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="layout">
+            42
+        </div>
+    </footer>
+
+    <script type="text/x-handlebars-template" id="posts-json-template">
+        {{json posts}}
+    </script>
+    <script type="text/x-handlebars-template" id="posts-table-template">
+        {{#table posts}}
+            {{description}}
+        {{/table}}
+    </script>
+
+    <script src="/libs/jquery/dist/jquery.js"></script>
+    <script src="/libs/handlebars/handlebars.js"></script>
+    <script src="/data.js"></script>
+    <script src="/posts.js"></script>
+</body>
+</html>
