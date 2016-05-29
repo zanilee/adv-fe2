@@ -49,8 +49,8 @@ gulp.task('watch', function () {
 } );
 
 
-//CODESTYLE
-gulp.task('csscomb', function () {  // csscomb - поправить стили в исходных файлах.
+//  Codestyle
+gulp.task('csscomb', function () {  // csscomb corrects styles in source *.less files
     return gulp.src('styles/*.less')
         .pipe(csscomb().on('error', handleError))
         .pipe(gulp.dest(function (file) {
@@ -58,23 +58,22 @@ gulp.task('csscomb', function () {  // csscomb - поправить стили �
         }));
 });
 
-gulp.task('htmlhint', function () {  // htmlhint — поправить стили в исходных файлах.
+gulp.task('htmlhint', function () {  // htmlhint corrects styles in source *.html files
 });
 
-gulp.task('jscs', function () {  // JSCS — поправить стили в исходных файлах.
+gulp.task('jscs', function () {  // JSCS corrects styles in source *.js files
 });
 
-gulp.task('jshint', function () {  // JSHint — вывести ошибки.
+gulp.task('jshint', function () {  // JSHint show errors
 });
 
 gulp.task('style', function () {
 });
 
-//CODESTYLE//
+//  End codestyle
 
 function handleError(err) {
     console.log(err.toString());
     this.emit('end');
     return this;
 }
-
