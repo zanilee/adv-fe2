@@ -1,12 +1,17 @@
 {
     "name": "gulp-lesson",
     "version": "0.0.1",
+    "scripts": {
+        "start": "node app.js"
+    },
+    "dependencies": {
+        "express": "^4.13.4"
+    },
     "devDependencies": {
         "gulp": "^3.9.0",
         "gulp-bower": "^0.0.13",
         "gulp-less": "3.0.5",
         "gulp-csscomb": "^3.0.6",
-        "gulp-minify-css": "^1.2.2",
         "gulp-if": "^1.2.5",
         "gulp-autoprefixer": "^3.1.0",
         "gulp-concat": "^2.5.2",
@@ -20,6 +25,9 @@
         "run-sequence": "^1.1.5",
         "gulp-debug": "*",
         "gulp-minify-css": "^1.2.3",
-        "yargs": "^4.1.0"
+        "gulp-cssnano": "^2.1.0",
+        "yargs": "^4.1.0",
+        "minimist": "^1.2.0",
+        "html-minifier": "2.1.3"
     }
 }
