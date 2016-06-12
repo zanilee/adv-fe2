@@ -18,6 +18,8 @@ var cssnano = require('gulp-cssnano');
 var sourcemaps = require('gulp-sourcemaps');
 var minimist = require('minimist');
 var htmlmin = require('gulp-htmlmin');
+var htmlhint = require('gulp-htmlhint');
+var autoprefixer = require('gulp-autoprefixer');
 
 //var folders = {
 //    styles: {
@@ -39,9 +41,7 @@ var htmlmin = require('gulp-htmlmin');
 //  [1] Runs 'libs' & 'build' task
 //gulp.task('default', ['libs', 'build']);
 
-//  [15] Default task geathers all css, js, html and images
-//gulp.task('default', ['css', 'html', 'images', 'js']);
-
+//  [15] Default task gathers all css, js, html and images
 gulp.task('default', ['css', 'html', 'images', 'js']);
 
 //  [2] Add dependencies
@@ -67,32 +67,28 @@ gulp.task('images', function () {
 //  [6] Copy all *.html to bin
 gulp.task('html', function () {
     return gulp.src(['**/*.html','!./node_modules/**','!./libs/**'])
-        //.pipe(gulpif(process.argv.slice(2)[1] === '--prod', htmlmin({collapseWhitespace: true})))
-        //..pipe(htmlmin({collapseWhitespace: true}))
+        .pipe(gulpif(process.argv.slice(2)[1] == '--prod', htmlmin({collapseWhitespace: true})))
         .pipe(gulp.dest(destDir));
 });
 
 //  [7] Combine all .less files, run less preprocessor, minify with cssnano, write to bin/static/styles.css.
 //  Run with --prod for production mode
 //  Run without --prod to add sourcemap
-gulp.task('css', function () {
-//    return gulp.src('styles/**/*.less')
-//        .pipe(concat('styles.css'))
-//        .pipe(less())
-//        .pipe(gulpif(argv.prod, cssnano()))
-//        .pipe(gulp.dest(destDir + '/styles/'));
 
+//  !! cssnano does nothing :((
+//  !! so does livereload :((
+gulp.task('css', function () {
     return gulp.src('styles/**/*.less')
         .pipe(concat('styles.css'))
         .pipe(less())
         .pipe(gulpif(process.argv.slice(2)[1] !== '--prod', sourcemaps.init())) // Add sourcemap if not production mode
-        //.pipe(cssnano())
+        //.pipe(gulpif(argv.prod, cssnano()))
         .pipe(gulpif(process.argv.slice(2)[1] !== '--prod', sourcemaps.write('.'))) // Add sourcemap if not production mode
+        //.pipe(livereload())
         .pipe(gulp.dest(destDir + '/styles/'));
 
     //.pipe(gulp.dest(folders.styles.dst));
 });
-
 gulp.task('copy-static', function () {
     return gulp.src(['**/*.{png,jpg,svg}', '*.html', '**.*.js', '!./node_modules/**'])
         .pipe(gulp.dest(destDir));
@@ -114,6 +110,7 @@ gulp.task('clean', function () {
 gulp.task('watch', function () {
     gulp.watch('**/*.@(png|jpg|svg)', ['images']);
     gulp.watch('**/*.html', ['html']);
+   // livereload.listen();
     gulp.watch('**/*.less', ['css']);
     gulp.watch('**/*.js', ['js']);
 });
@@ -133,7 +130,7 @@ gulp.task('js', function () {
 gulp.task('reload-page', function () {
 });
 
-//  ![11.1] csscomb corrects styles in source *.less files
+//  [11.1] csscomb corrects styles in source *.less files
 gulp.task('csscomb', function () {  // csscomb corrects styles in source *.less files
     return gulp.src('styles/*.less')
         .pipe(csscomb().on('error', handleError))
@@ -143,7 +140,12 @@ gulp.task('csscomb', function () {  // csscomb corrects styles in source *.less 
 });
 
 //  ![11.2] JSCS corrects styles in source *.js files
+//  !!Should it just show errors in console?
 gulp.task('jscs', function () {
+    return gulp.src(['js/**/*.js'])
+        .pipe(jscs({fix: true}))
+        .pipe(jscs.reporter())
+        .pipe(gulp.dest('src'));
 });
 
 //  [11.3] JSHint task shows errors
@@ -154,10 +156,19 @@ gulp.task('jshint', function () {
 });
 
 //  ![11.4] htmlhint corrects styles in source *.html files
+//  !!Should it just show errors in console?
 gulp.task('htmlhint', function () {
+    return gulp.src(['**/*.html','!./node_modules/**','!./libs/**'])
+        .pipe(htmlhint())
+        .pipe(htmlhint.reporter());
 });
 
-
+//  [12] html minification
+gulp.task('htmlmin', function () {
+    return gulp.src(['**/*.html','!./node_modules/**','!./libs/**'])
+        .pipe(htmlmin({collapseWhitespace: true}))
+        .pipe(gulp.dest(destDir));
+});
 
 //  [16] Style tasks runs all code style tasks
 gulp.task('style', ['jscs', 'htmlhint', 'csscomb']);
