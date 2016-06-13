@@ -66,29 +66,27 @@ gulp.task('images', function () {
 
 //  [6] Copy all *.html to bin
 gulp.task('html', function () {
-    return gulp.src(['**/*.html','!./node_modules/**','!./libs/**'])
-        .pipe(gulpif(process.argv.slice(2)[1] == '--prod', htmlmin({collapseWhitespace: true})))
+    return gulp.src(['*.html'])
+        .pipe(gulpif(!argv.prod, htmlmin({collapseWhitespace: true})))
         .pipe(gulp.dest(destDir));
 });
 
 //  [7] Combine all .less files, run less preprocessor, minify with cssnano, write to bin/static/styles.css.
 //  Run with --prod for production mode
 //  Run without --prod to add sourcemap
-
-//  !! cssnano does nothing :((
-//  !! so does livereload :((
 gulp.task('css', function () {
     return gulp.src('styles/**/*.less')
         .pipe(concat('styles.css'))
+        .pipe(gulpif(!argv.prod, sourcemaps.init())) // Add sourcemap if not production mode
         .pipe(less())
-        .pipe(gulpif(process.argv.slice(2)[1] !== '--prod', sourcemaps.init())) // Add sourcemap if not production mode
-        //.pipe(gulpif(argv.prod, cssnano()))
-        .pipe(gulpif(process.argv.slice(2)[1] !== '--prod', sourcemaps.write('.'))) // Add sourcemap if not production mode
-        //.pipe(livereload())
-        .pipe(gulp.dest(destDir + '/styles/'));
-
+        .pipe(autoprefixer())
+        .pipe(gulpif(argv.prod, cssnano()))
+        .pipe(gulpif(!argv.prod, sourcemaps.write('.'))) // Add sourcemap if not production mode
+        .pipe(gulp.dest(destDir + '/styles/'))
+        .pipe(livereload());
     //.pipe(gulp.dest(folders.styles.dst));
 });
+
 gulp.task('copy-static', function () {
     return gulp.src(['**/*.{png,jpg,svg}', '*.html', '**.*.js', '!./node_modules/**'])
         .pipe(gulp.dest(destDir));
@@ -110,7 +108,7 @@ gulp.task('clean', function () {
 gulp.task('watch', function () {
     gulp.watch('**/*.@(png|jpg|svg)', ['images']);
     gulp.watch('**/*.html', ['html']);
-   // livereload.listen();
+    livereload.listen();
     gulp.watch('**/*.less', ['css']);
     gulp.watch('**/*.js', ['js']);
 });
@@ -121,9 +119,9 @@ gulp.task('watch', function () {
 gulp.task('js', function () {
     return gulp.src(['js/**/*.js'])
         .pipe(concat('script.js'))
-        .pipe(gulpif(process.argv.slice(2)[1] !== '--prod', sourcemaps.init())) // Add sourcemap if not production mode
-            .pipe(uglify())
-        .pipe(gulpif(process.argv.slice(2)[1] !== '--prod', sourcemaps.write('.'))) // Add sourcemap if not production mode
+        .pipe(gulpif(!argv.prod, sourcemaps.init())) // Add sourcemap if not production mode
+        .pipe(uglify())
+        .pipe(gulpif(!argv.prod, sourcemaps.write('.'))) // Add sourcemap if not production mode
         .pipe(gulp.dest(destDir + '/js/'));
 });
 
@@ -139,13 +137,16 @@ gulp.task('csscomb', function () {  // csscomb corrects styles in source *.less 
         }));
 });
 
-//  ![11.2] JSCS corrects styles in source *.js files
-//  !!Should it just show errors in console?
+//  [11.2] JSCS corrects styles in source *.js files
 gulp.task('jscs', function () {
     return gulp.src(['js/**/*.js'])
-        .pipe(jscs({fix: true}))
-        .pipe(jscs.reporter())
-        .pipe(gulp.dest('src'));
+        .pipe(jscs({
+            fix: true,
+            configPath: '.jscs.json'
+        }).on('error', handleError))
+        .pipe(gulp.dest(function (file) {
+            return file.base;
+        }));
 });
 
 //  [11.3] JSHint task shows errors
@@ -155,8 +156,7 @@ gulp.task('jshint', function () {
         .pipe(jshint.reporter('default'));
 });
 
-//  ![11.4] htmlhint corrects styles in source *.html files
-//  !!Should it just show errors in console?
+//  [11.4] htmlhint corrects styles in source *.html files
 gulp.task('htmlhint', function () {
     return gulp.src(['**/*.html','!./node_modules/**','!./libs/**'])
         .pipe(htmlhint())
