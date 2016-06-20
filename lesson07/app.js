@@ -16,8 +16,10 @@ app.use('/json-server', jsonServer.router('api/mocks/db.json'));
 
 app.use('/', express.static(path.join(__dirname, CLIENT_PATH, '/')));
 
-var server = app.listen(3000, function () {
+// https://docs.npmjs.com/misc/scripts
+var server = app.listen(process.env.npm_package_config_port, function () {
     var host = server.address().address;
     var port = server.address().port;
-    console.log('listening ' + host + ':' +  port);
+
+    console.log('Server started on ' + host + ':' + port);
 });
