@@ -24,34 +24,29 @@ app.all('/test/', function (req, res) {
     res.send('<html><body><h1>Hello test</h1></body></html>');
 });
 
-//  Get request
-app.get('/api/' + apiVersion + '/*', function (req, res) {
-    render(req, res);
+app.all('/api/:apiVersion/:entity/?:id', function (req, res) {
+    var reqMethod = req.method.toLowerCase();
+
+    switch (reqMethod) {
+        case 'get':
+            render(req, res);
+            break
+        case 'post':
+            add(req, res);
+            break
+        case 'put':
+            put(req, res);
+            break
+        case 'delete':
+            remove(req, res);
+            break
+        default:
+            render(req, res);
+            break
+    }
 });
 
-//  Post request
-app.post('/api/' + apiVersion + '/*', function (req, res) {
-    add(req, res);
-});
-
-//  Put request
-app.put('/api/' + apiVersion + '/*', function (req, res) {
-    put(req, res);
-});
-
-//  Delete request
-app.delete('/api/' + apiVersion + '/*', function (req, res) {
-    remove(req, res);
-});
-
-//  Handle all other requests
-app.all('/api/' + apiVersion + '/*', function (req, res) {
-    console.log(req);
-
-    render(req, res);
-});
-
-
+//  Render
 function render(req, res) {
     var dirPath = req.path + '/';
     //   /api/1.0.1/users/
@@ -62,28 +57,28 @@ function render(req, res) {
     
     var jsonName = req.method.toLowerCase() + '.json';
     //   get.json, post.json, etc.
-    //   \/api\/[a-z]*\/[0-9]*\/get.json
-
+    //   var regexp = '\/api\/[a-z]*\/[0-9]*\/';
 
     function fileList(dir) {
         return fs.readdirSync(dir).reduce(function(list, file) {
             var name = path.join(dir, file);
+            var isJson = (file === jsonName);
             var isDir = fs.statSync(name).isDirectory();
-            return list.concat(isDir ? fileList(name) : [name]);
+
+            return (isJson || isDir) ? list.concat(isDir ? fileList(name) : [name] ) : list;
         }, []);
     }
 
-    // var regexp = '\/api\/[a-z]*\/[0-9]*\/';
     var theFileList = fileList(dirPath);
+
 
     for (var i = 0; i < theFileList.length; i++) {
         if (fs.statSync( theFileList[i])) {
             res.setHeader('content-type', 'application/json');
 
             fs.createReadStream(theFileList[i]).pipe(res);
-            console.log(i , ' => ', theFileList[i]);
         } else {
-            console.log('no such file', theFileList[i]);
+            console.log('There is no such file', theFileList[i]);
 
             res
                 .status(404)
@@ -98,22 +93,6 @@ function render(req, res) {
                 .end();
         }
     }
-
-/*  !!!!!!
-    Now we have a list of all files in /api/users/ or /api/posts directory:
-
-    0 ' => ' 'D:\\_educ\\course\\adv-fe2\\lesson08\\api\\posts\\001\\get.json'
-    1 ' => ' 'D:\\_educ\\course\\adv-fe2\\lesson08\\api\\posts\\002\\get.json'
-    2 ' => ' 'D:\\_educ\\course\\adv-fe2\\lesson08\\api\\posts\\002\\put.json'
-    3 ' => ' 'D:\\_educ\\course\\adv-fe2\\lesson08\\api\\posts\\get.json'
-
-    Select from them files from 001, 002 etc folders but not the root folder with get.json or put.json name
-
-    How to select files only in directories??
-*/
-
-
-
 /*
      //  Initial code
 
@@ -150,6 +129,7 @@ function render(req, res) {
 */
 }
 
+//  Delete
 function remove(req, res) {
     var dirPath = req.path + '/'; //   /api/1.0.1/users/
 
@@ -157,16 +137,19 @@ function remove(req, res) {
     dirPath = path.join(__dirname, dirPath); //  the full path to the file
 
     var deleteFolderRecursive = function(dirPath) {
-        if(fs.statSync(dirPath)) {
+        try {
+            var stats = fs.statSync(dirPath); // Does the dir exist?
+
             fs.readdirSync(dirPath).forEach(function(file,index){
                 var curPath = path.join(dirPath, file);
-                console.log(curPath);
+
                 if(fs.lstatSync(curPath).isDirectory()) { // Recursion
                     deleteFolderRecursive(curPath);
                 } else { // Delete file
                     fs.unlinkSync(curPath);
                 }
             });
+
             fs.rmdirSync(dirPath);
 
             res
@@ -177,7 +160,8 @@ function remove(req, res) {
                 ])
                 .end();
 
-        } else {  // If there is no such directory, why don't we get here??
+        }
+        catch(err) {  // If there is no such directory, why don't we get here??
             console.log('No such directory');
             res
                 .status(404)
@@ -191,19 +175,19 @@ function remove(req, res) {
     deleteFolderRecursive(dirPath);
 }
 
-
+//  Add post
 function add(req, res) {
     var dirPath = req.path + '/'; //   /api/1.0.1/users/001
 
     dirPath = dirPath.replace('/' + apiVersion + '/', '/');
     dirPath = path.join(__dirname, dirPath); //  the full path to the file
 
-    // Ok, we're doing the dirPath for the 3-rd time - in every function. can we do it as a separate function??
-
     var filePath = dirPath + 'get.json';
 
-    if (fs.statSync(dirPath)) { // Does the dir exist?
+    try {
+        var stats = fs.statSync(dirPath); // Does the dir exist?
         // Directory already exists: 409
+
         console.log('The user/post already exist!');
         res
             .status(409) // Conflict: Indicates that the request could not be processed because of conflict in the request.
@@ -211,37 +195,39 @@ function add(req, res) {
                 "status": "fail"
             }])
             .end();
-    } else {   // If there is no such directory, why don't we get here??
-        // Directory does not exist: create
+    }
+    catch(err) {
+        var postData = '';
 
-        // How to get the "003" from the request??
+        if (req.params.entity == 'users') {
+            postData = {
+                "id": req.params.id, // Replace to an id from the path in browser
+                "email": "testuser003@test.com",
+                "name": "testuser003",
+                "image": "some-image003.jpg",
+                "password": "1324567",
+                "following": {
+                    "tags": [],
+                    "users": []
+                }
+            };
+        } else {
+            postData = {
+                "postId": req.params.id,  // Replace to an id from the path in browser
+                "imgUrl": "some-image.jpg",
+                "likeCount": 0,
+                "description": "Cool text",
+                "userId": req.params.id // Replace to an id from the path in browser
+            };
+        }
+        
+        fs.mkdir(dirPath); // Directory does not exist: creating
 
-        var postData = {
-            "postId": "003",  // Replace to an id from the path in browser
-            "imgUrl":"some-image.jpg",
-            "likeCount":0,
-            "description":"Cool text",
-            "userId":"003" // Replace to an id from the path in browser
-        };
-
-        var userData = {
-            "id": "003", // Replace to an id from the path in browser
-            "email": "testuser003@test.com",
-            "name": "testuser003",
-            "image": "some-image003.jpg",
-            "password": "1324567",
-            "following": {
-                "tags": [],
-                "users": []
-            }
-        };
-
-        // How to add a check if it is user or post??
         fs.writeFile(filePath, JSON.stringify(postData, null, 4), function(err) {
             if(err) {
                 console.log(err);
             } else {
-                console.log("JSON saved to " + filePath);
+                console.log('JSON saved to ' + filePath);
             }
         });
 
@@ -249,7 +235,7 @@ function add(req, res) {
             .json([{
                 "status": "success"
             }])
-            .end();  // Do we need a res when we're done and no other action except of end??
+            .end();
     }
 }
 
@@ -262,33 +248,38 @@ function put(req, res) {
 
     var filePath = dirPath + 'get.json';
 
-    if (fs.statSync(dirPath)) {
-        var postData = {
-            "postId": "003",  // Replace to an id from the path in browser
-            "imgUrl":"some-image.jpg",
-            "likeCount":0,
-            "description":"Cool text",
-            "userId":"003" // Replace to an id from the path in browser
-        };
+    try {
+        var stats = fs.statSync(dirPath);
 
-        var userData = {
-            "id": "003", // Replace to an id from the path in browser
-            "email": "testuser003@test.com",
-            "name": "testuser003",
-            "image": "some-image003.jpg",
-            "password": "1324567",
-            "following": {
-                "tags": [],
-                "users": []
-            }
-        };
+        var postData = '';
 
-        // How to add a check if it is user or post??
-        fs.writeFile(filePath, JSON.stringify(userData, null, 4), function(err) {
+        if (req.params.entity == 'users') {
+            postData = {
+                "id": req.params.id, // Replace to an id from the path in browser
+                "email": "putupdate@test.com",
+                "name": "putupdate",
+                "image": "some-image003.jpg",
+                "password": "1324567",
+                "following": {
+                    "tags": [],
+                    "users": []
+                }
+            };
+        } else {
+            postData = {
+                "postId": req.params.id,  // Replace to an id from the path in browser
+                "imgUrl": "some-image.jpg",
+                "likeCount": 0,
+                "description": "put update",
+                "userId": req.params.id // Replace to an id from the path in browser
+            };
+        }
+
+        fs.writeFile(filePath, JSON.stringify(postData, null, 4), function(err) {
             if(err) {
                 console.log(err);
             } else {
-                console.log("JSON saved to " + filePath);
+                console.log('JSON saved to ' + filePath);
             }
         });
 
@@ -296,9 +287,9 @@ function put(req, res) {
             .json([{
                 "status": "success"
             }])
-            .end();  // Do we need a res when we're done and no other action except of end??
-
-    } else {
+            .end();
+    }
+    catch(err) {
         console.log('There is no such file');
 
         res
