@@ -52,7 +52,7 @@ likesCount.then(function(){
     console.log('Error executing likesCount!');
 });
 
-//  [1.3] Get comments to the post /json-server/posts/466 -------------------------------------------------------------
+//  [1.3.1] Get comments to the post /json-server/posts/466 -----------------------------------------------------------
 var commentsGet = fetch(POST_URL, {
     method: 'GET',
     headers: {
@@ -78,15 +78,14 @@ commentsGet.then(function(){
     console.log('Error executing commentsGet!');
 });
 
-//  ToDo --------------------------------------------------------------------------------------------------------------
-//  can we announce like this & then use it in every our promise in the project?
-var usersJson = fetch(USER_URL);
-var postsJson = fetch(POSTS_URL);
-
-
+//  [1.3.2] Get comments with user names to the post /json-server/posts/466 -------------------------------------------
 Promise.all([
-    postsJson,
-    usersJson
+    fetch(USER_URL).then(function (res) {
+        return res.json()
+    }),
+    fetch(POST_URL).then(function (res) {
+        return res.json()
+    })
 ], {
     method: 'GET',
     headers: {
@@ -94,23 +93,40 @@ Promise.all([
         'Content-Type': 'application/json'
     }
 }).then(function(res){
-    var commentShow = '';
-    var usersList = [];
-    var i = 0;
+    var commentList = []; // Comments array
+    var commentShow = ''; // The string that is added to html
+    var usersIndexList = []; // Users indexes list
+    var usersList = []; // User names array
+    var i = 0, j = 0, k = 0;
 
-    console.log(res[0]);
-    console.log('---------------------');
-    console.log(res[1]);
+    var usersSource = res[0];
+    var commentsSource = res[1];
 
-    //  ??Ok, we got "Response" as a result. But we need json. How we can get it from response?
+    commentsSource.comments.forEach(function(){
+        usersIndexList.push(commentsSource.comments[i].user);
+        commentList.push(commentsSource.comments[i].text);
+        i++;
+    });
 
+    usersSource.forEach(function(){
+        while(k < usersIndexList.length) {
+            if (usersSource[j].id == usersIndexList[k]) {
+                console.log();
+                usersList.push(usersSource[j].name);
+            }
+            k++;
+        }
+        k = 0;
+        j++;
+    });
 
-//    res.comments.forEach(function(){
-//        commentShow += usersList[res.comments[i].user] + ': ' + res.comments[i].text + '; ';
-//        console.log(commentShow);
-//        i++;
-//    });
+    for (i = 0; i < commentList.length; i++) {
+        commentShow += usersList[i] + ': ' + commentList[i] + '; ';
+    }
+
+    document.getElementById('comments').innerHTML = commentShow;
+    console.log('Promise.all executed successfully');
+
+}).catch(function(err){
+    console.log('Error executing Promise.all!');
 });
-//.catch(function(err){
-//    console.log('Error executing Promise.all!');
-//});
