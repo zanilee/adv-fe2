@@ -10,7 +10,6 @@ module.exports = function Bar(options) {
     });
 
     function render() {
-        
         elem.html(App.templates['bar']({
             progress: Array(progress)
         }));

@@ -1,40 +1,19 @@
 var Bar = require('./bar.js');
 
-describe('bar', function () {
+describe('god-hate-indicator', function () {
     beforeEach(function () {
-        this.happines = new Bar();
+        this.bar = new Bar();
     });
 
-
-    describe('set method ', function () {
-        beforeEach(function() {
-            spyOn(this.happines, 'add').and.callThrough();
-            spyOn(this.happines, 'remove');
-        });
-
-        
+    describe('render method ', function () {
         it('should be defined', function () {
-            expect(this.happines.set).toBeDefined();
+            expect(this.bar.render).toBeDefined();
             debugger;
         });
 
-        it('should call add method', function () {
-            this.happines.set([]);
-            expect(this.happines.add).not.toHaveBeenCalled();
-
-        });
-
-        it('should call add method', function () {
-            this.happines.set([{ getCount: function () { return 4; }}]);
-            expect(this.happines.add).toHaveBeenCalledWith(4);
-
-
-        });
-
-        it('should call add method with correct arguments', function () {
-            this.happines.set([{ getCount: function () { return 4 } } ]);
-            this.happines.set([{ getCount: function () { return 1 } } ]);
-            expect(this.happines.remove).toHaveBeenCalledWith(3);
+        it('should be called', function () {
+            this.bar.render();
+            expect(this.bar.render).toHaveBeenCalled();
         });
 
     });
