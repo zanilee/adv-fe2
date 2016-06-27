@@ -26,11 +26,11 @@ gulp.task('dev', ['build'], function (cb) {
 });
 
 gulp.task('build', function (cb) {
-    runSequence( 
-        'clean-build', 
-        'copy-src', 
+    runSequence(
+        'clean-build',
+        'copy-src',
         ['bower', 'browserify', 'templates', 'concat-component-css'],
-        cb 
+        cb
     );
 });
 
@@ -66,8 +66,8 @@ gulp.task('templates', function() {
         .pipe(wrap('Handlebars.template(<%= contents %>)'))
         .pipe(declare({
               namespace: 'App.templates',
-              noRedeclare: true, 
-        })) 
+              noRedeclare: true,
+        }))
         .pipe(concat('templates.js'))
         .pipe(gulp.dest(DEST_DIR));
 });
@@ -76,10 +76,10 @@ gulp.task('clean-build', function (cb) {
     return gulp.src(DEST_DIR + '/*', {read: false})
         .pipe(clean({force: true}));
 } );
-   
+
 gulp.task('watch', function () {
     livereload.listen();
-    gulp.watch(CLIENT_DIR + '/**/*.@(html|js|css|hbs)', ['build-and-reload']); 
+    gulp.watch(CLIENT_DIR + '/**/*.@(html|js|css|hbs)', ['build-and-reload']);
 });
 
 gulp.task('build-and-reload', ['build'], function () {
@@ -94,4 +94,3 @@ gulp.task('component', function () {
 gulp.task('container', function () {
     ctCreator.create('client_src/containers/', argv.name);
 });
-

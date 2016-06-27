@@ -1,5 +1,13 @@
-/* ToDo: user-wealth */
+.user-wealth {
+    border: 1px solid #cfbe92;
+    padding: 10px 20px 7px;
+}
 
-.user-wealth-indicator {
-    border: 1px solid #f0f;
+.user-wealth dt {
+    font-size: 16px;
+    font-weight: 700;    
+}
+
+.user-wealth dd {
+    margin: 3px 20px;
 }

@@ -5,18 +5,20 @@ module.exports = function GiftTunner(options) {
     var elem = $('<div></div>');
 
     var hateIndicator = options.hateIndicator;
-    var hateCount = options.hateCount;
+    var resource = options.resource;
 
     var bar = new Bar({});
+
     var controls = new TuneControls({
         bar: bar,
         hateIndicator: hateIndicator,
-        hateCount: hateCount
+        resource: resource
     });
- 
+
     function render() {
         elem.html(App.templates['gift-tunner']({}));
 
+        elem.find('.gift-tunner__name').html(resource.name);
         elem.find('.gift-tunner__name').html(options.name);
         elem.find('.gift-tunner__bar').html(bar.render().elem);
         elem.find('.gift-tunner__controls').html(controls.render().elem);
