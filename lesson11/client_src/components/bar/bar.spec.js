@@ -1,6 +1,6 @@
 var Bar = require('./bar.js');
 
-describe('god-hate-indicator', function () {
+describe('bar', function () {
     beforeEach(function () {
         this.bar = new Bar();
     });
