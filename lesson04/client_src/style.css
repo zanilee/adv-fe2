@@ -1,0 +1,50 @@
+html, body {
+    height: 100%;
+    font: 14px/1.4 Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+a {
+    color: #2e1c06;
+}
+.button {
+    -webkit-user-select: none;  /* Chrome all / Safari all */
+    -moz-user-select: none;     /* Firefox all */
+    -ms-user-select: none;      /* IE 10+ */
+    user-select: none;
+    background: #f1e767;
+    background: -moz-linear-gradient(top, #f1e767 0%, #feb645 100%);
+    background: -webkit-linear-gradient(top, #f1e767 0%,#feb645 100%);
+    background: linear-gradient(to bottom, #f1e767 0%,#feb645 100%);
+    border-radius: 3px;
+    border: solid 1px #feb645;
+    color: #241200;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 14px;
+    margin: 2px;
+    outline: none;
+    padding: 4px 8px;
+}
+.button:hover {
+    background: #f1e767;
+    background: -moz-linear-gradient(top, #feb645 0%, #f1e767 100%);
+    background: -webkit-linear-gradient(top, #feb645 0%, #f1e767 100%);
+    background: linear-gradient(to bottom,#feb645 0%, #f1e767 100%);
+    border-radius: 3px;
+    border: solid 1px #f1e767;
+}
+.layout{
+    background: #2e1c06 url('/bastet.jpg') no-repeat 100% 100%;
+    bottom: 0;
+    left: 0;
+    padding: 0 0 295px;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+.content {
+    background: rgba(255, 255, 255, .2);
+    color: #cfbe92;
+    padding: 20px;
+}

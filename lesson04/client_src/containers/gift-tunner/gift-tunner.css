@@ -1,0 +1,13 @@
+.gift-tunner {
+    margin: 10px 0;
+}
+.gift-tunner__name,
+.gift-tunner__bar {
+    display: inline-block;
+}
+.gift-tunner__name {
+    text-transform: capitalize;
+}
+.gift-tunner__name:after {
+    content: ': ';
+}
